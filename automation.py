@@ -38,7 +38,7 @@ data["title"] = page["properties"]["제목"]["title"][0]["plain_text"]
 # writer=client.users.retrieve(page["properties"]["Author"]["people"][0]["id"]) #TODO: edit to adopt to the origin doc's format
 # data["writer"] = writer["name"]
 data["writer"] = page["properties"]["회의록 작성자"]["people"][0]["name"]
-data["location"] = page["properties"]["회의 장소"]["rich_text"][0]["text"]["content"]
+data["location"] = page["properties"]["회의 장소"]["multi_select"][0]["name"]
 data["date"]=page["properties"]["날짜"]["date"]["start"]
 data["day_of_week"] = page["properties"]["요일포함 날짜"]["formula"]["string"][-3:]
 
@@ -127,7 +127,7 @@ def parse_data(block):
 def parse_content(blocks=content["results"], indent=0):
     result = []
     for block in blocks:
-        if block["type"] in ["column", "column_list", "divider"]:
+        if block["type"] in ["column", "column_list", "divider", "synced_block", "unsupported"]:
             continue
         result.append(
             {
@@ -148,15 +148,23 @@ parse_content()
 
 # %% write content
 prev_level=0
+ignore=False
 for block in parse_content():
     if "text" in block and block["text"]!="":
-        if block["text"]=="보고안건":
+        if block["text"]=="보고 안건":
             hwpx.move_to_field(field="report_content")
             continue
-        elif block["text"]=="논의안건":
+        elif block["text"]=="논의 안건":
             hwpx.DeleteBack()
             hwpx.move_to_field(field="discuss_content")
             continue
+        elif block["text"]=="<ignore>":
+            ignore=True
+        elif block["text"]=="</ignore>":
+            ignore=False
+        if ignore:
+            continue
+        
         if block["type"]=="heading_1" or block["type"]=="heading_2":
             cur_level=0
         elif block["type"]=="heading_3":
