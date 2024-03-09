@@ -1,11 +1,11 @@
 # %% setup
-import dotenv
+from dotenv import load_dotenv
 import os
 from notion_client import Client
 import json
 from pyhwpx import Hwp
 
-dotenv.load_dotenv()
+load_dotenv()
 hwpx=Hwp()
 
 # %% get page
@@ -115,19 +115,17 @@ def parse_data(block):
     block_data = block[block_type]
     if block_type == "image":
         return {"type": block_type, "source": block_data["file"]["url"]}
-    elif block_type=="link_to_page":
-        return {"type": block_type, "text": ""}
     print(block)
     return {
         "type": block_type,
         "text": "".join(map(lambda b: b["plain_text"], block_data["rich_text"])),
     }
 
-
+unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview"]
 def parse_content(blocks=content["results"], indent=0):
     result = []
     for block in blocks:
-        if block["type"] in ["column", "column_list", "divider", "synced_block", "unsupported"]:
+        if block["type"] in unsupported:
             continue
         result.append(
             {

@@ -1,7 +1,8 @@
-import dotenv, os
+from dotenv import load_dotenv 
+import os
 from notion_client import Client
 
-dotenv.load_dotenv()
+load_dotenv(override=True)
 client = Client(auth=os.getenv("NOTION_TOKEN"))
 
 def _get_data(page):
@@ -10,14 +11,12 @@ def _get_data(page):
 
     participants=page["properties"]["참여자"]["people"]
     for participant in participants:
-        data["participants"].append("홍길동") ### ((participant["name"]))  # 오류 방지 테스트용 주석 
+        data["participants"].append(participant["name"])
     data["participants_num"]=len(data["participants"])
 
     data["title"] = page["properties"]["제목"]["title"][0]["plain_text"]
-    # writer=client.users.retrieve(page["properties"]["Author"]["people"][0]["id"]) #TODO: edit to adopt to the origin doc's format
-    # data["writer"] = writer["name"]
-    data["writer"] = "홍길동" ### page["properties"]["회의록 작성자"]["people"][0]["name"]  # 오류 방지 테스트용 주석 
-    data["location"] = "윙방" ### page["properties"]["회의 장소"]["rich_text"][0]["text"]["content"]  # 오류 방지 테스트용 주석 
+    data["writer"] = page["properties"]["회의록 작성자"]["people"][0]["name"]  
+    data["location"] = page["properties"]["회의 장소"]["multi_select"][0]["name"]  
     data["date"]=page["properties"]["날짜"]["date"]["start"]
     data["day_of_week"] = page["properties"]["요일포함 날짜"]["formula"]["string"][-3:]
 
@@ -42,10 +41,11 @@ def _parse_block(block):
         "text": "".join(map(lambda b: b["plain_text"], block_data["rich_text"])),
     }
 
+unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview"]
 def _parse_content(blocks, indent=0):
     result = []
     for block in blocks:
-        if block["type"] in ["column", "column_list", "divider"]:
+        if block["type"] in unsupported:
             continue
         result.append(
             {
@@ -59,7 +59,8 @@ def _parse_content(blocks, indent=0):
             )
     return result
 
-def get(notion_pageid): 
+def get(notion_pageid):
+    print(notion_pageid)
     page = client.pages.retrieve(notion_pageid) 
     data = _get_data(page) 
     raw_content = _get_blocks(notion_pageid) 

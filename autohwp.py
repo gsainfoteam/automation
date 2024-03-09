@@ -1,14 +1,20 @@
+# %%
+import os
 from pyhwpx import Hwp
 import pythoncom
 
-HWP_TEMPLATE_PATH = "GSA_report_template.hwp"
-HWP_SAVE_PATH = "GSA_report.hwp"
+BASE_PATH=os.path.dirname(os.path.abspath(__file__))
 
+# %%
+HWP_TEMPLATE_PATH = "\\GSA_report_template.hwp"
+HWP_SAVE_PATH = "\\reports\\GSA_report_{20240225}.hwp" #TODO: function
+
+# %%
 def generate(data, content):
     # open 
     pythoncom.CoInitialize()
     hwpx=Hwp(new=True) # , visible=False)
-    hwpx.open(HWP_TEMPLATE_PATH) # , arg="suspendpassword:false;forceopen:true;versionwarning:false")
+    hwpx.open(BASE_PATH+HWP_TEMPLATE_PATH) # , arg="suspendpassword:false;forceopen:true;versionwarning:false")
 
     # write page values
     hwpx.put_field_text("writer", data["writer"])
@@ -44,9 +50,9 @@ def generate(data, content):
         hwpx.TableRightCell()
         hwpx.insert_text(name)
         hwpx.TableRightCell()
-        if name=="최익준":
+        if name=="이정우":
             hwpx.insert_text("정보국장")
-        elif name!="최익준":
+        elif name!="이정우":
             hwpx.insert_text("정보국원")
 
         for _ in range(2):
@@ -62,9 +68,9 @@ def generate(data, content):
         hwpx.TableRightCell()
         hwpx.insert_text(name)
         hwpx.TableRightCell()
-        if name=="최익준":
+        if name=="이정우":
             hwpx.insert_text("정보국장")
-        elif name!="최익준":
+        elif name!="이정우":
             hwpx.insert_text("정보국원")
 
         for _ in range(2):
@@ -75,15 +81,23 @@ def generate(data, content):
     # write content
     hwpx.move_to_field(field="report_content")
     prev_level=0
+    ignore=False
     for block in content:
         if "text" in block and block["text"]!="":
-            if block["text"]=="보고안건":
+            if block["text"]=="보고 안건":
                 hwpx.move_to_field(field="report_content")
                 continue
-            elif block["text"]=="논의안건":
+            elif block["text"]=="논의 안건":
                 hwpx.DeleteBack()
                 hwpx.move_to_field(field="discuss_content")
                 continue
+            elif block["text"]=="<ignore>":
+                ignore=True
+            elif block["text"]=="</ignore>":
+                ignore=False
+            if ignore:
+                continue
+
             if block["type"]=="heading_1" or block["type"]=="heading_2":
                 cur_level=0
             elif block["type"]=="heading_3":
@@ -116,3 +130,4 @@ def generate(data, content):
     hwpx.clear()  # hwpx.clear(option=3)
     
     return HWP_SAVE_PATH
+# %%

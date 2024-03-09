@@ -1,17 +1,26 @@
+# %%
 import dotenv, os
 from flask import Flask, request, jsonify
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from pyngrok import conf, ngrok
 import threading  
 from datetime import datetime
 import traceback
 import autonotion
 import autohwp 
 
-dotenv.load_dotenv()
+dotenv.load_dotenv(override=True)
 client = WebClient(token=os.getenv("SLACKBOT_TOKEN"))
 app = Flask(__name__) 
 
+http_tunnel=ngrok.connect(5000)
+tunnels=ngrok.get_tunnels()
+
+for tunnel in tunnels:
+    print(tunnel)
+
+# %%
 def generate_meeting_note_file(notion_pageid):
     try:
         data, content = autonotion.get(notion_pageid)
@@ -67,7 +76,7 @@ def handle_command():
     notion_pageid = notion_url.split("-")[-1].split("?")[0]
     print(notion_pageid)
 
-    if command == '/meetingnote': 
+    if command == '/meetingnote':
         thread = threading.Thread(target=upload_file_to_slack, args=(
             channel_id,
             notion_pageid,
