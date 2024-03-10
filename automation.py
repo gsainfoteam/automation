@@ -9,7 +9,7 @@ load_dotenv()
 hwpx=Hwp()
 
 # %% get page
-client = Client(auth=os.getenv("TOKEN"))
+client = Client(auth=os.getenv("NOTION_TOKEN"))
 page = client.pages.retrieve(os.getenv("PAGE"))
 page
 
