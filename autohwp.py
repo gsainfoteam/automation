@@ -7,7 +7,7 @@ BASE_PATH=os.path.dirname(os.path.abspath(__file__))
 
 # %%
 HWP_TEMPLATE_PATH = "\\GSA_report_template.hwp"
-HWP_SAVE_PATH = "\\reports\\GSA_report_{20240225}.hwp" #TODO: function
+HWP_SAVE_PATH = "\\reports\\GSA_report_"
 
 # %%
 def generate(data, content):
@@ -126,8 +126,8 @@ def generate(data, content):
     hwpx.DeleteBack()
     
     # close with final save 
-    hwpx.save_as(BASE_PATH+HWP_SAVE_PATH, arg="") 
+    hwpx.save_as(BASE_PATH+HWP_SAVE_PATH+data["date"].replace("-", "")+".hwp", arg="") 
     hwpx.clear()  # hwpx.clear(option=3)
     
-    return BASE_PATH+HWP_SAVE_PATH
+    return BASE_PATH+HWP_SAVE_PATH+data["date"].replace("-", "")+".hwp"
 # %%
