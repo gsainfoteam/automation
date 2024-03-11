@@ -126,8 +126,8 @@ def generate(data, content):
     hwpx.DeleteBack()
     
     # close with final save 
-    hwpx.save_as(HWP_SAVE_PATH, arg="") 
+    hwpx.save_as(BASE_PATH+HWP_SAVE_PATH, arg="") 
     hwpx.clear()  # hwpx.clear(option=3)
     
-    return HWP_SAVE_PATH
+    return BASE_PATH+HWP_SAVE_PATH
 # %%
