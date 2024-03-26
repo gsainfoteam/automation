@@ -121,7 +121,7 @@ def parse_data(block):
         "text": "".join(map(lambda b: b["plain_text"], block_data["rich_text"])),
     }
 
-unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview"]
+unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview", "file"]
 def parse_content(blocks=content["results"], indent=0):
     result = []
     for block in blocks:
@@ -146,6 +146,7 @@ parse_content()
 
 # %% write content
 prev_level=0
+cur_level=0
 ignore=False
 for block in parse_content():
     if "text" in block and block["text"]!="":
@@ -160,6 +161,7 @@ for block in parse_content():
             ignore=True
         elif block["text"]=="</ignore>":
             ignore=False
+            continue
         if ignore:
             continue
         
