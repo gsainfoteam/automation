@@ -5,7 +5,7 @@ from notion_client import Client
 import json
 from pyhwpx import Hwp
 
-load_dotenv()
+load_dotenv(override=True)
 hwpx=Hwp()
 
 # %% get page
@@ -79,9 +79,9 @@ for i in range((data["participants_num"]//2)+data["participants_num"]%2):
     hwpx.TableRightCell()
     hwpx.insert_text(name)
     hwpx.TableRightCell()
-    if name=="최익준":
+    if name=="이정우":
         hwpx.insert_text("정보국장")
-    elif name!="최익준":
+    elif name!="이정우":
         hwpx.insert_text("정보국원")
 
     for _ in range(2):
@@ -97,9 +97,9 @@ for i in range((data["participants_num"]//2)+data["participants_num"]%2, data["p
     hwpx.TableRightCell()
     hwpx.insert_text(name)
     hwpx.TableRightCell()
-    if name=="최익준":
+    if name=="이정우":
         hwpx.insert_text("정보국장")
-    elif name!="최익준":
+    elif name!="이정우":
         hwpx.insert_text("정보국원")
 
     for _ in range(2):
@@ -114,14 +114,36 @@ def parse_data(block):
     block_type = block["type"]
     block_data = block[block_type]
     if block_type == "image":
-        return {"type": block_type, "source": block_data["file"]["url"]}
-    print(block)
+        return {"type": block_type, "source": block_data[block_data["type"]]["url"]}
+    elif block_type == "table":
+        table_width=block["table"]["table_width"]
+        table_column=0
+        
+        table_text=[]
+        for row in block["children"]["results"]:
+            table_column+=1
+            table_row=[]
+            for cell in row["table_row"]["cells"]:
+                table_row.append(cell[0]["plain_text"])
+            table_text.append(table_row)
+
+        print(table_text)
+        
+        return {
+            "type": "table",
+            "table_width": table_width,
+            "table_column": table_column,
+            "text": table_text
+        }
+
+    elif block_type == "bookmark":
+        return {"type": block_type, "text": f'({block_data["url"]})'}
     return {
         "type": block_type,
         "text": "".join(map(lambda b: b["plain_text"], block_data["rich_text"])),
     }
 
-unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview", "file"]
+unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview", "file", "child_page", "table_row"]
 def parse_content(blocks=content["results"], indent=0):
     result = []
     for block in blocks:
@@ -140,7 +162,7 @@ def parse_content(blocks=content["results"], indent=0):
     return result
 
 
-parse_content()
+parsed_content=parse_content()
 
 
 
@@ -148,8 +170,20 @@ parse_content()
 prev_level=0
 cur_level=0
 ignore=False
-for block in parse_content():
-    if "text" in block and block["text"]!="":
+for block in parsed_content:
+    print(block)
+    if block["type"]=="table":
+        table_width=int(block["table_width"])
+        table_column=int(block["table_column"])
+
+        hwpx.create_table(table_column, table_width)
+        for i in range(table_column):
+            for j in range(table_width):
+                hwpx.insert_text(block["text"][i][j])
+                hwpx.MoveRight()
+        hwpx.BreakLine()
+
+    elif "text" in block and block["text"]!="":
         if block["text"]=="보고 안건":
             hwpx.move_to_field(field="report_content")
             continue
@@ -189,10 +223,31 @@ for block in parse_content():
         hwpx.BreakPara()
     elif "text" not in block:
         continue
+
     prev_level=cur_level
 hwpx.DeleteBack()
 
 # %%
-
-
+hwpx.move_to_field(field="report_content")
+# %%
+hwpx.link
+# %%
+table_row={'cells': [[{'type': 'text', 'text': {'content': '멘토', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': '멘토', 'href': None}], [{'type': 'text', 'text': {'content': '멘티', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': '멘티', 'href': None}]]}
+# %%
+for cell in table_row["cells"]:
+    print(cell[0])
+# %%
+hwpx.create_table(2, 2, header=False)
+# %%
+hwpx.insert_text("filled")
+hwpx.MoveDown()
+# %%
+hwpx.insert_text("filled")
+hwpx.BreakLine()
+# %%
+hwpx.create_table(2, 2, header=False)
+# %%
+hwpx.MoveRight()
+# %%
+hwpx.insert_text("filled")
 # %%
