@@ -228,26 +228,3 @@ for block in parsed_content:
 hwpx.DeleteBack()
 
 # %%
-hwpx.move_to_field(field="report_content")
-# %%
-hwpx.link
-# %%
-table_row={'cells': [[{'type': 'text', 'text': {'content': '멘토', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': '멘토', 'href': None}], [{'type': 'text', 'text': {'content': '멘티', 'link': None}, 'annotations': {'bold': False, 'italic': False, 'strikethrough': False, 'underline': False, 'code': False, 'color': 'default'}, 'plain_text': '멘티', 'href': None}]]}
-# %%
-for cell in table_row["cells"]:
-    print(cell[0])
-# %%
-hwpx.create_table(2, 2, header=False)
-# %%
-hwpx.insert_text("filled")
-hwpx.MoveDown()
-# %%
-hwpx.insert_text("filled")
-hwpx.BreakLine()
-# %%
-hwpx.create_table(2, 2, header=False)
-# %%
-hwpx.MoveRight()
-# %%
-hwpx.insert_text("filled")
-# %%
