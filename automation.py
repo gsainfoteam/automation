@@ -10,11 +10,11 @@ hwpx=Hwp()
 
 # %% get page
 client = Client(auth=os.getenv("NOTION_TOKEN"))
-page = client.pages.retrieve(os.getenv("PAGE"))
+page = client.pages.retrieve(os.getenv("PAGE_ID"))
 page
 
 # %% get blocks
-def get_blocks(block_id=os.getenv("PAGE")):
+def get_blocks(block_id=os.getenv("PAGE_ID")):
     content = client.blocks.children.list(block_id)
     for block in content["results"]:
         if block["has_children"]:
@@ -143,7 +143,7 @@ def parse_data(block):
         "text": "".join(map(lambda b: b["plain_text"], block_data["rich_text"])),
     }
 
-unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview", "file", "child_page", "table_row"]
+unsupported=["column", "column_list", "divider", "synced_block", "unsupported", "table_of_contents", "link_to_page", "link_preview", "file", "child_page", "table_row", "child_database"]
 def parse_content(blocks=content["results"], indent=0):
     result = []
     for block in blocks:
