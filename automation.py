@@ -7,14 +7,17 @@ from pyhwpx import Hwp
 
 load_dotenv(override=True)
 hwpx=Hwp()
+# %% convert page url to page id
+page_url=os.getenv("PAGE_ID")
+page_id=page_url.split("-")[-1].split("?")[0]
 
 # %% get page
 client = Client(auth=os.getenv("NOTION_TOKEN"))
-page = client.pages.retrieve(os.getenv("PAGE_ID"))
+page = client.pages.retrieve(page_id)
 page
 
 # %% get blocks
-def get_blocks(block_id=os.getenv("PAGE_ID")):
+def get_blocks(block_id=page_id):
     content = client.blocks.children.list(block_id)
     for block in content["results"]:
         if block["has_children"]:
@@ -79,9 +82,9 @@ for i in range((data["participants_num"]//2)+data["participants_num"]%2):
     hwpx.TableRightCell()
     hwpx.insert_text(name)
     hwpx.TableRightCell()
-    if name=="이정우":
+    if name=="고도현":
         hwpx.insert_text("정보국장")
-    elif name!="이정우":
+    elif name!="고도현":
         hwpx.insert_text("정보국원")
 
     for _ in range(2):
